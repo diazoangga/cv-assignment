@@ -1,3 +1,5 @@
 Dataset/
 .venv/
 scratch_data/
+.vscode/
+__pycache__/
