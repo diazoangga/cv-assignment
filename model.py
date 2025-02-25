@@ -9,30 +9,14 @@ class DownBlock(Layer):
         self.filters = filters
         self.use_maxpool = use_maxpool
     
-        self.conv_1 = Conv2D(self.filters, 3, padding= 'same')
+        self.conv_1 = Conv2D(self.filters, 3, padding= 'same', kernel_initializer = 'he_normal')
         self.bn_1 = BatchNormalization()
         self.act_1 = LeakyReLU()
-        self.conv_2 = Conv2D(self.filters, 3, padding= 'same')
+        self.conv_2 = Conv2D(self.filters, 3, padding= 'same', kernel_initializer = 'he_normal')
         self.bn_2 = BatchNormalization()
         self.act_2 = LeakyReLU()
         if self.use_maxpool == True:
             self.maxpool = MaxPooling2D(strides= (2,2))
-
-    # def build(self, inputs):
-    #     out = self.conv_1(inputs)
-    #     out = self.bn_1(out)
-    #     out = self.act_1(out)
-    #     out = self.conv_2(out)
-    #     out = self.bn_2(out)
-    #     out = self.act_2(out)
-    #     if self.use_maxpool == True:
-    #         out = self.maxpool(out)
-    #         return out, inputs
-    #     else:
-    #         return out
-
-    # def build(self, input_shape):
-    #     super().build(input_shape)
     
     def call(self, inputs, training=False):
         out = self.conv_1(inputs)
@@ -53,25 +37,12 @@ class UpBlock(Layer):
         self.filters = filters
         self.up = UpSampling2D()
         self.concat = Concatenate(axis=3)
-        self.conv_1 = Conv2D(self.filters, 3, padding='same')
+        self.conv_1 = Conv2D(self.filters, 3, padding='same', kernel_initializer = 'he_normal')
         self.bn_1 = BatchNormalization()
         self.act_1 = LeakyReLU()
-        self.conv_2 = Conv2D(self.filters, 3, padding='same')
+        self.conv_2 = Conv2D(self.filters, 3, padding='same', kernel_initializer = 'he_normal')
         self.bn_2 = BatchNormalization()
         self.act_2 = LeakyReLU()
-    
-    # def build(self, input, skip_layer):
-    #     x = self.up(input)
-    #     out = self.concat([x, skip_layer])
-    #     out = self.conv_1(out)
-    #     out = self.bn_1(out)
-    #     out = self.act_1(out)
-    #     out = self.conv_2(out)
-    #     out = self.bn_2(out)
-    #     out = self.act_2(out)
-    #     return out
-
-
     
     def call(self, inputs, skip_layer, training=False):
         x = self.up(inputs)
@@ -121,9 +92,8 @@ class UNet(models.Model):
         out = self.conv(out)
         return out
 
-
-
 if __name__ == '__main__':
     model = UNet(3, 0.2)
     model(Input(shape=(128,128,3)), training=True)
     model.summary()
+
