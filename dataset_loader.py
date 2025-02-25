@@ -43,7 +43,7 @@ class DatasetLoader():
         print('\nSplitting training and validation sets...')
 
         train_img_paths, val_img_paths, train_label_paths, val_label_paths = train_test_split(
-            trainval_img_paths, trainval_label_path, test_size=self.train_val_ratio, random_state=RANDOM_SEED)
+            trainval_img_paths, trainval_label_path, test_size=(1-self.train_val_ratio), random_state=RANDOM_SEED)
         
         print('num of training data: ', len(train_img_paths))
         print('num of validation data: ', len(val_img_paths))
@@ -74,6 +74,7 @@ class DatasetLoader():
         label = tf.io.read_file(label_path)
         label = tf.image.decode_png(label, channels=1)
         label = tf.image.resize(label, shape)
+        label = label /255.0
 
         return img, label
     
@@ -139,18 +140,26 @@ class DatasetLoader():
 
         #     return img, label
         
-        img, label = _image_flip(img, label, flip)
-        img, label = _image_rotate(img, label, rotate)
-        img, label = _image_translate(img, label, translate)
+        flip_img, flip_label = _image_flip(img, label, flip)
+        rot_img, rot_label = _image_rotate(img, label, rotate)
+        trans_img, trans_label = _image_translate(img, label, translate)
         
-        return img, label
+        # img, label = _image_flip(img, label, flip)
+        # img, label = _image_rotate(img, label, rotate)
+        # img, label = _image_translate(img, label, translate)
+        return (flip_img, flip_label), (rot_img, rot_label), (trans_img, trans_label)
     
 
     def prepare_dataset(self, flip=None, rotate=None, translate=None):
+        def augment_wrapper(img, label):
+            flipped, rot, trans = self.img_augment(img, label, flip=flip, rotate=rotate, translate=translate)
+            return tf.data.Dataset.from_tensors((img, label)).concatenate(tf.data.Dataset.from_tensors(flipped)).concatenate(tf.data.Dataset.from_tensors(rot)).concatenate(tf.data.Dataset.from_tensors(trans))
+        
         train_ds, val_ds, test_ds = self.read_dataset()
         train_ds = train_ds.map(self.img_preprocessing, num_parallel_calls=tf.data.AUTOTUNE)
-        train_ds = train_ds.map(lambda img, label: self.img_augment(img, label, flip=flip, rotate=rotate, translate=translate),
-                            num_parallel_calls=tf.data.AUTOTUNE)
+        train_ds = train_ds.flat_map(augment_wrapper)
+        # train_ds = train_ds.map(lambda img, label: self.img_augment(img, label, flip=flip, rotate=rotate, translate=translate),
+        #                     num_parallel_calls=tf.data.AUTOTUNE)
         train_ds = train_ds.shuffle(1000).batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         # train_ds = iter(train_ds)
 
@@ -165,5 +174,8 @@ class DatasetLoader():
         return train_ds, val_ds, test_ds
 
     
-
-
+if __name__ == "__main__":
+    datasetLoader = DatasetLoader('./Dataset')
+    train_ds, val_ds, test_ds = datasetLoader.prepare_dataset(flip='horizontal',
+                                                          rotate='ccw',
+                                                          translate=30)
