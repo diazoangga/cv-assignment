@@ -10,16 +10,19 @@ class CustomLoss(Loss):
         self.dice_loss_coeff = loss_conf['dice_loss']
         self.iou_loss_coeff = loss_conf['iou_loss']
         self.focal_loss_coeff = loss_conf['focal_loss']
-        self.focal_loss = CategoricalFocalCrossentropy()
+        self.focal_loss = SparseCategoricalCrossentropy()
     
     def call(self, y_true, y_pred):
         def dice_loss(y_true, y_pred, smooth=1):
+            print(y_pred.shape, y_true.shape)
+            y_true = tf.cast(y_true, dtype=tf.float32)
             numerator = 2*tf.reduce_sum(y_true * y_pred) + smooth
             denominator = tf.reduce_sum(y_true + y_pred) + smooth
 
             return 1-(numerator/denominator)
 
         def iou_loss(y_true, y_pred, smooth=1):
+            y_true = tf.cast(y_true, dtype=tf.float32)
             intersection = tf.reduce_sum(y_true * y_pred)
             union = tf.reduce_sum(y_true + y_pred) - intersection
 

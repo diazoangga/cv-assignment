@@ -92,8 +92,10 @@ class UNet(models.Model):
         out = self.conv(out)
         return out
 
-if __name__ == '__main__':
-    model = UNet(3, 0.2)
-    model(Input(shape=(128,128,3)), training=True)
-    model.summary()
+# if __name__ == '__main__':
+#     model = UNet(3, 0.2)
+#     inputs = Input([128,128,3])
+#     out = model(inputs, training=True)
+#     a = tf.keras.Model(inputs=inputs, outputs=out)
+#     a.summary()
 
