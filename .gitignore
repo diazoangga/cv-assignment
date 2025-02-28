@@ -3,3 +3,5 @@ Dataset/
 scratch_data/
 .vscode/
 __pycache__/
+logs/
+old/
