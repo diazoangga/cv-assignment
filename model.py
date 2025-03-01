@@ -74,7 +74,7 @@ class UNet(models.Model):
         self.up_4 = UpBlock(filters[0], name='decoder_4')
         
         self.dropout = Dropout(dropout)
-        self.conv = Conv2D(num_class, 1, activation='softmax')
+        self.conv = Conv2D(num_class, 3, padding='same', activation='softmax')
 
     def call(self, inputs, training=False):
         out, skip1 = self.down_1(inputs, training=training)
@@ -92,10 +92,13 @@ class UNet(models.Model):
         out = self.conv(out)
         return out
 
-# if __name__ == '__main__':
-#     model = UNet(3, 0.2)
-#     inputs = Input([128,128,3])
-#     out = model(inputs, training=True)
-#     a = tf.keras.Model(inputs=inputs, outputs=out)
-#     a.summary()
+
+if __name__ == '__main__':
+    model = UNet(3, 0.2)
+    inputs = Input([128,128,3])
+    out = model(inputs, training=True)
+    a = tf.keras.Model(inputs=inputs, outputs=out)
+    a.summary()
+
+
 
