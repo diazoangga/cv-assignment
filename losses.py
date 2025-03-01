@@ -7,14 +7,14 @@ from tensorflow.keras.layers import *
 class CustomLoss(Loss):
     def __init__(self, loss_conf):
         super(CustomLoss, self).__init__()
-        self.dice_loss_coeff = loss_conf['dice_loss']
-        self.iou_loss_coeff = loss_conf['iou_loss']
-        self.focal_loss_coeff = loss_conf['focal_loss']
+        self.dice_loss_coeff = loss_conf['DICE_COEFF']
+        self.iou_loss_coeff = loss_conf['IOU_COEFF']
+        self.focal_loss_coeff = loss_conf['FOCAL_LOSS_COEFF']
         self.focal_loss = SparseCategoricalCrossentropy()
     
     def call(self, y_true, y_pred):
         def dice_loss(y_true, y_pred, smooth=1):
-            print(y_pred.shape, y_true.shape)
+            # print(y_pred.shape, y_true.shape)
             y_true = tf.cast(y_true, dtype=tf.float32)
             numerator = 2*tf.reduce_sum(y_true * y_pred) + smooth
             denominator = tf.reduce_sum(y_true + y_pred) + smooth
